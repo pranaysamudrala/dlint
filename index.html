@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    /* Add styling for the dark background */
+    body {
+      background-color: #000;
+      color: #fff;
+      text-align: center;
+    }
+    /* Style for the code snippets */
+    .code-snippet {
+      background-color: #000;
+      padding: 10px;
+      margin-bottom: 20px;
+      display: none;
+      text-align: left;
+    }
+    /* Style for the "Show Code" buttons */
+    .show-button {
+      background-color: #22222200;
+      color: #fff;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+    /* Style for the "Copy Code" buttons */
+    .copy-button {
+      background-color: #333;
+      color: #fff;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      float: right;
+    }
+  </style>
+</head>
+<body>
+
+  <button class="show-button" onclick="showCode('code-snippet-1')">W2 FFN</button>
+  <button class="show-button" onclick="showCode('code-snippet-2')">W3 Backpropagation</button>
+  <button class="show-button" onclick="showCode('code-snippet-3')">W4 SGD</button>
+  <button class="show-button" onclick="showCode('code-snippet-4')">W4 BGD</button>
+  <button class="show-button" onclick="showCode('code-snippet-5')">W4 MBGD</button>
+  <button class="show-button" onclick="showCode('code-snippet-6')">W5 PCA</button>
+  <button class="show-button" onclick="showCode('code-snippet-7')">W6 SVD</button>
+
+
+  <div class="code-snippet" id="code-snippet-1">
+    <button class="copy-button" onclick="copyToClipboard('code-snippet-1')">Copy Code</button>
+    <pre>
+      <code id="code-snippet-1">
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+import matplotlib.colors
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, mean_squared_error
+from tqdm import tqdm_notebook
+
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.datasets import make_blobs
+class SigmoidNeuron:
+  #A class for sigmoid neuron
+  
+  def __init__(self):
+    self.w = None
+    self.b = None
+    
+ 
+  def perceptron(self, x):
+    return np.dot(x, self.w.T) + self.b
+  
+  def sigmoid(self, x):
+    return 1.0/(1.0 + np.exp(-x))
+  
+  def grad_w_mse(self, x, y):
+    y_pred = self.sigmoid(self.perceptron(x))
+    return (y_pred - y) * y_pred * (1 - y_pred) * x
+  
+  def grad_b_mse(self, x, y):
+    y_pred = self.sigmoid(self.perceptron(x))
+    return (y_pred - y) * y_pred * (1 - y_pred)
+  
+  def grad_w_ce(self, x, y):
+    y_pred = self.sigmoid(self.perceptron(x))
+    if y == 0:
+      return y_pred * x
+    elif y == 1:
+      return -1 * (1 - y_pred) * x
+    else:
+      raise ValueError("y should be 0 or 1")
+    
+  def grad_b_ce(self, x, y):
+    y_pred = self.sigmoid(self.perceptron(x))
+    if y == 0:
+      return y_pred 
+    elif y == 1:
+      return -1 * (1 - y_pred)
+    else:
+      raise ValueError("y should be 0 or 1")
+  
+  def fit(self, X, Y, epochs=1, learning_rate=1, initialise=True, loss_fn="mse", display_loss=False):
+    
+    # initialise w, b
+    if initialise:
+      self.w = np.random.randn(1, X.shape[1])
+      self.b = 0
+      
+    if display_loss:
+      loss = {}
+    
+    for i in tqdm_notebook(range(epochs), total=epochs, unit="epoch"):
+      dw = 0
+      db = 0
+      for x, y in zip(X, Y):
+        if loss_fn == "mse":
+          dw += self.grad_w_mse(x, y)
+          db += self.grad_b_mse(x, y) 
+        elif loss_fn == "ce":
+          dw += self.grad_w_ce(x, y)
+          db += self.grad_b_ce(x, y)
+          
+      m = X.shape[1]    
+      self.w -= learning_rate * dw/m
+      self.b -= learning_rate * db/m
+      
+      if display_loss:
+        Y_pred = self.sigmoid(self.perceptron(X))
+        if loss_fn == "mse":
+          loss[i] = mean_squared_error(Y, Y_pred)
+        elif loss_fn == "ce":
+          loss[i] = log_loss(Y, Y_pred)
+    
+    if display_loss:
+      plt.plot(loss.values())
+      plt.xlabel('Epochs')
+      if loss_fn == "mse":
+        plt.ylabel('Mean Squared Error')
+      elif loss_fn == "ce":
+        plt.ylabel('Log Loss')
+      plt.show()
+      
+  def predict(self, X):
+    Y_pred = []
+    for x in X:
+      y_pred = self.sigmoid(self.perceptron(x))
+      Y_pred.append(y_pred)
+    return np.array(Y_pred)
+my_cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["red", "yellow", "green"])
+
+data, labels = make_blobs(n_samples=1000, centers=4,n_features=2, random_state=0)
+print(data.shape, labels.shape)
+
+plt.scatter(data[:,0], data[:,1], c = labels, cmap = my_cmap)
+plt.show()
+      </code>
+    </pre>
+  </div>
+
+  <div class="code-snippet" id="code-snippet-2">
+    <button class="copy-button" onclick="copyToClipboard('code-snippet-2')">Copy Code</button>
+    <pre>
+      <code id="code-snippet-2">
+#3rd week backpropagation optimized
+import numpy as np
+import matplotlib.pyplot as plt
+
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+def sigmoid_derivative(x):
+    return sigmoid(x) * (1 - sigmoid(x))
+
+def update_weight(w, grad, learning_rate):
+    return w - learning_rate * grad
+
+x = np.array([0.1, 0.4])
+target = 0.7
+learning_rate = 0.01
+w = np.random.rand(2)
+
+predicted_output = []
+network_error = []
+
+for i in range(80000):
+    # Forward Pass
+    y = np.dot(w, x)
+    predicted = sigmoid(y)
+    err = (predicted - target) ** 2
+
+    predicted_output.append(predicted)
+    network_error.append(err)
+
+    # Backward Pass
+    g1 = 2 * (predicted - target)
+    g2 = sigmoid_derivative(y)
+    grad = g1 * g2 * x
+    w = update_weight(w, grad, learning_rate)
+
+    print(predicted)
+
+plt.figure()
+plt.plot(network_error)
+plt.title("Iteration Number vs Error")
+plt.xlabel("Iteration Number")
+plt.ylabel("Error")
+
+plt.figure()
+plt.plot(predicted_output)
+plt.title("Iteration Number vs Prediction")
+plt.xlabel("Iteration Number")
+plt.ylabel("Prediction")
+      </code>
+    </pre>
+  </div>
+
+  <div class="code-snippet" id="code-snippet-3">
+    <button class="copy-button" onclick="copyToClipboard('code-snippet-3')">Copy Code</button>
+    <pre>
+      <code id="code-snippet-3">
+#sgd w4
+import numpy as np
+from matplotlib import pyplot as plt
+
+def compute_cost(X, y, theta):
+    m = y.size
+    h = X.dot(theta)
+    J = (1 / (2 * m)) * np.sum(np.square(h - y))
+    return J
+
+def stoch(X, y, alpha, num_iter):
+    m = y.size
+    n = X.shape[1]
+    theta = np.zeros(n)
+    j_history = np.zeros(num_iter)
+
+    for i in range(num_iter):
+        indices = np.random.permutation(m)
+        X = X[indices, :]
+        y = y[indices]
+
+        for j in range(m):
+            h = X[j, :].dot(theta)
+            theta = theta - alpha * (h - y[j]) * X[j, :]
+        j_history[i] = compute_cost(X, y, theta)
+
+    return theta, j_history
+
+X = np.array([1, 2, 3, 4, 5]).reshape(-1, 1)
+y = np.array([1, 2, 3, 4, 5])
+X = np.hstack([np.ones_like(X), X])
+theta, j_history = stoch(X, y, alpha=0.01, num_iter=1000)
+
+plt.plot(j_history)
+plt.xlabel("iterations")
+plt.ylabel("cost")
+plt.show()
+      </code>
+    </pre>
+  </div>
+
+  <div class="code-snippet" id="code-snippet-4">
+    <button class="copy-button" onclick="copyToClipboard('code-snippet-4')">Copy Code</button>
+    <pre>
+      <code id="code-snippet-4">
+#batch gradient descent w4
+import numpy as np
+import matplotlib.pyplot as plt
+
+def batch_gradient_descent(X, y_true, epochs, learning_rate=0.01):
+    number_of_features = X.shape[1]
+    w = np.ones(shape=(number_of_features))
+    b = 0
+    total_samples = X.shape[0]
+    cost_list = []
+    epoch_list = []
+
+    for i in range(epochs):
+        y_predicted = np.dot(w, X.T) + b
+        w_grad = -(2/total_samples)*(X.T.dot(y_true-y_predicted))
+        b_grad = -(2/total_samples)*np.sum(y_true-y_predicted)
+        w = w - learning_rate * w_grad
+        b = b - learning_rate * b_grad
+        cost = np.mean(np.square(y_true-y_predicted))
+
+        if i % 10 == 0:
+            cost_list.append(cost)
+            epoch_list.append(i)
+
+    return w, b, cost, cost_list, epoch_list
+
+scaled_X = np.array([[0.55, 0.7], [0.62, 0.45], [0.28, 0.9], [0.34, 0.3], [0.12, 0.5], [0.3, 0.2], [0.75, 0.5], [0.73, 0.8]])
+scaled_y = np.array([2.45, 2.2, 1.85, 1.45, 1.0, 1.0, 2.0, 2.3])
+
+w, b, cost, cost_list, epoch_list = batch_gradient_descent(scaled_X, scaled_y.reshape(scaled_y.shape[0],), 500)
+
+plt.xlabel("Epoch")
+plt.ylabel("Cost")
+plt.plot(epoch_list, cost_list)
+#plt.title("Batch Gradient Descent")
+plt.show()
+</code>
+</pre>
+</div>
+
+<div class="code-snippet" id="code-snippet-5">
+  <button class="copy-button" onclick="copyToClipboard('code-snippet-5')">Copy Code</button>
+  <pre>
+    <code id="code-snippet-5">
+#w4? mini batch grad desc
+def mini_batch_gradient_descent(X, y, epochs=100, batch_size=5, learning_rate=0.01):
+    w = np.ones(X.shape[1])
+    b = 0
+    num_batches = len(X) // batch_size
+    costs = []
+    for i in range(epochs):
+        X, y = shuffle(X, y)
+        for j in range(num_batches):
+            X_batch = X[j*batch_size:(j+1)*batch_size]
+            y_batch = y[j*batch_size:(j+1)*batch_size]
+            y_pred = X_batch @ w + b
+            w_grad = -(2/len(X_batch)) * X_batch.T @ (y_batch - y_pred)
+            b_grad = -(2/len(X_batch)) * np.sum(y_batch - y_pred)
+            w -= learning_rate * w_grad
+            b -= learning_rate * b_grad
+            cost = np.mean(np.square(y_batch - y_pred))
+            costs.append(cost)
+    return w, b, costs
+
+plt.xlabel("epoch")
+plt.ylabel("cost")
+plt.plot(epoch_list,cost_list)
+    </code>
+  </pre>
+</div>
+    </code>
+  </pre>
+</div>
+
+<div class="code-snippet" id="code-snippet-6">
+  <button class="copy-button" onclick="copyToClipboard('code-snippet-6')">Copy Code</button>
+  <pre>
+    <code id="code-snippet-6">
+#pca w5
+import numpy as np
+def pca(X, num_components):
+    X = X - np.mean(X, axis=0)
+    cov = np.cov(X, rowvar=False)
+    eigenvalues,eigenvectors = np.linalg.eigh(cov)
+    idx = eigenvalues.argsort()[::-1]
+    eigenvectors = eigenvectors[:, idx]
+    eigenvectors= eigenvectors[:, :num_components]
+    X_transformed = np.dot (X, eigenvectors)
+    return X_transformed
+X=np.random.rand(100,4)
+X_pca=pca(X, num_components=2)
+print(X_pca.shape)
+    </code>
+  </pre>
+</div>
+
+<div class="code-snippet" id="code-snippet-7">
+  <button class="copy-button" onclick="copyToClipboard('code-snippet-7')">Copy Code</button>
+  <pre>
+    <code id="code-snippet-7">
+#w6 svd
+import numpy as np
+A=np.array([[1,2],[3,4],[5,6]])
+U,s,Vt=np.linalg.svd(A)
+sigma=np.zeros_like(A)
+sigma[:min(A.shape),:min(A.shape)]=np.diag(s)
+B=np.dot(U,np.dot(sigma,Vt))
+print("Original Matrix:\n",A)
+print("U:\n",U)
+print("s:\n",s)
+print("Vt:\n",Vt)
+print("Reconstructed Matrix:\n",B)
+    </code>
+  </pre>
+</div>
+
+
+  <script>
+    function showCode(elementId) {
+      // Get all the code snippets
+      var codeSnippets = document.getElementsByClassName("code-snippet");
+
+      // Loop through all the code snippets and hide them
+      for (var i = 0; i < codeSnippets.length; i++) {
+        codeSnippets[i].style.display = "none";
+      }
+
+      // Show the selected code snippet
+      var selectedSnippet = document.getElementById(elementId);
+      selectedSnippet.style.display = "block";
+    }
+
+    function copyToClipboard(elementId) {
+      // Get the text from the code snippet
+      var codeSnippet = document.getElementById(elementId);
+      var text = codeSnippet.getElementsByTagName("code")[0].textContent;
+
+      // Create a temporary textarea element for copying
+      var temp = document.createElement("textarea");
+      temp.value = text;
+      document.body.appendChild(temp);
+      temp.select();
+
+      // Copy the text to the clipboard
+      navigator.clipboard.writeText(temp.value)
+        .then(() => {
+            console.log('Code copied to clipboard');
+            alert('Code copied to clipboard!')
+        })
+        .catch(err => {
+            console.error('Failed to copy: ', err);
+        });
+
+      // Remove the temporary textarea
+      document.body.removeChild(temp);
+    }
+
+  </script>
+
+</body>
+</html>
