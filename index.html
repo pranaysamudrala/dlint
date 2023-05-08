@@ -46,6 +46,7 @@
   <button class="show-button" onclick="showCode('code-snippet-4')">W4 BGD</button>
   <button class="show-button" onclick="showCode('code-snippet-5')">W4 MBGD</button>
   <button class="show-button" onclick="showCode('code-snippet-6')">W5 PCA</button>
+  <button class="show-button" onclick="showCode('code-snippet-8')">W5 PCA</button>
   <button class="show-button" onclick="showCode('code-snippet-7')">W6 SVD</button>
 
 
@@ -404,7 +405,44 @@ print("Reconstructed Matrix:\n",B)
     </code>
   </pre>
 </div>
+<div class="code-snippet" id="code-snippet-8">
+  <button class="copy-button" onclick="copyToClipboard('code-snippet-8')">Copy Code</button>
+  <pre>
+    <code id="code-snippet-8">
+#w6 svd
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data'
+names = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width', 'class']
+dataset = pd.read_csv(url, names=names)
+X = dataset.iloc[:, :-1].values
+y = dataset.iloc[:, -1].values
+X = (X - np.mean(X, axis=0)) / np.std(X, axis=0)
+cov_matrix = np.cov(X.T)
+eigenvalues, eigenvectors = np.linalg.eig(cov_matrix)
+idx = eigenvalues.argsort()[::-1]
+eigenvectors = eigenvectors[:, idx]
+cumulative_variance_ratio = np.cumsum(eigenvalues / np.sum(eigenvalues))
+plt.plot(cumulative_variance_ratio)
+plt.xlabel('Number of components')
+plt.ylabel('Cumulative explained variance ratio')
+plt.show()
+num_components = np.argmax(cumulative_variance_ratio >= 0.95) + 1
+print(f'Number of components chosen: {num_components}')
 
+X_transformed = np.dot(X, eigenvectors[:, :num_components])
+
+for class_name, class_marker in zip(['Iris-setosa', 'Iris-versicolor', 'Iris-virginica'], ['o', '^', 's']):
+  plt.scatter(X_transformed[y==class_name, 0], X_transformed[y==class_name, 1], marker=class_marker, label=class_name)
+
+plt.xlabel('PC1')
+plt.ylabel('PC2')
+plt.legend()
+plt.show()
+    </code>
+  </pre>
+</div>
 
   <script>
     function showCode(elementId) {
