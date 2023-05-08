@@ -46,7 +46,7 @@
   <button class="show-button" onclick="showCode('code-snippet-4')">W4 BGD</button>
   <button class="show-button" onclick="showCode('code-snippet-5')">W4 MBGD</button>
   <button class="show-button" onclick="showCode('code-snippet-6')">W5 PCA</button>
-  <button class="show-button" onclick="showCode('code-snippet-8')">W5 PCA</button>
+  <button class="show-button" onclick="showCode('code-snippet-8')">W5 PCA2</button>
   <button class="show-button" onclick="showCode('code-snippet-7')">W6 SVD</button>
 
 
@@ -368,7 +368,7 @@ plt.show()
   <button class="copy-button" onclick="copyToClipboard('code-snippet-6')">Copy Code</button>
   <pre>
     <code id="code-snippet-6">
-#pca w5
+#pca w5 without graphs direct
 import numpy as np
 def pca(X, num_components):
     X = X - np.mean(X, axis=0)
@@ -409,7 +409,7 @@ print("Reconstructed Matrix:\n",B)
   <button class="copy-button" onclick="copyToClipboard('code-snippet-8')">Copy Code</button>
   <pre>
     <code id="code-snippet-8">
-#w6 svd
+#alternative code for pca with graphs
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
